@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using api.DAL;
+﻿using api.DAL;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
@@ -22,7 +18,7 @@ namespace api.Controllers
         [HttpGet("{id}")]
         public IActionResult GetEnrollmentsByStudentId(string id)
         {
-            return Ok(_dbService.GetEnrollmentsByStudentId(id));
+            return Ok(); // _dbService.GetEnrollmentsByStudentId(id));
         }
 
     }

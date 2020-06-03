@@ -2,42 +2,97 @@
 using api.exceptions;
 using api.models;
 using api.Services;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Security.Authentication;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace api.DAL
 {
     public class SqlDbService : IDbService
     {
 
+
         public IEnumerable<Student> GetStudents()
         {
-            List<Student> _students = new List<Student>();
-            using (var connection = new SqlConnection("Data Source=localhost;Initial Catalog=apbd;Integrated Security=True"))
-            using (var command = new SqlCommand())
-            {
-                command.Connection = connection;
-                command.CommandText = "select * from Student";
-
-                connection.Open();
-                var data = command.ExecuteReader();
-                while (data.Read())
-                {
-                    var student = new Student();
-                    student.FirstName = data["FirstName"].ToString();
-                    student.LastName = data["LastName"].ToString();
-                    student.IndexNumber = data["IndexNumber"].ToString();
-                    _students.Add(student);
-                }
-            }
-            return _students;
+            var db = new apbdContext();
+            var students = db.Student.ToList();
+            return students;
         }
+
+        public Student GetStudent(string index)
+        {
+            var db = new apbdContext();
+            var students = db.Student.Find(index);
+            return students;
+        }
+
+        public Student CreateStudent(Student student)
+        {
+
+            if (!IsValidStudent(student))
+            {
+                throw new InvalidArgumentException("Dane nie przeszły walidacji");
+            }
+            student.Salt = PasswordService.CreateSalt();
+            student.Password = PasswordService.Create(student.Password, student.Salt);
+            var db = new apbdContext();
+            db.Student.Add(student);
+            db.SaveChanges();
+            return student;
+        }
+
+        public Student UpdateStudent(Student student)
+        {
+            if (String.IsNullOrWhiteSpace(student.IndexNumber))
+            {
+                throw new InvalidArgumentException("Nie podano numeru indexu studenta do zmiany");
+            }
+            var db = new apbdContext();
+            db.Attach(student);
+
+            if (student.FirstName != null && student.FirstName.Trim().Length > 0)
+            {
+                db.Entry(student).Property("FirstName").IsModified = true;
+            }
+
+            if (student.LastName != null && student.LastName.Trim().Length > 0)
+            {
+                db.Entry(student).Property("LastName").IsModified = true;
+            }
+
+            if (student.BirthDate != null)
+            {
+                db.Entry(student).Property("BirthDate").IsModified = true;
+            }
+
+            db.SaveChanges();
+
+            return GetStudent(student.IndexNumber);
+        }
+
+        public void DeleteStudent(string index)
+        {
+            var db = new apbdContext();
+            var s = new Student
+            {
+                IndexNumber = index
+            };
+            db.Attach(s);
+            db.Remove(s);
+            db.SaveChanges();
+        }
+
+
+
+        //================================= stare
+
+
+
+
+
 
         public IEnumerable<Enrollment> GetEnrollmentsByStudentId(string id)
         {
@@ -218,6 +273,17 @@ namespace api.DAL
         }
 
 
+        private Boolean IsValidStudent(Student student)
+        {
+            if (String.IsNullOrWhiteSpace(student.FirstName) ||
+                String.IsNullOrWhiteSpace(student.LastName) ||
+                String.IsNullOrWhiteSpace(student.Password) ||
+                (student.BirthDate == null || student.BirthDate.Equals(new DateTime()) || student.BirthDate > DateTime.Now.AddYears(-18))) {
+                return false;
+            }
+            return true;
+        }
+
         private Boolean IsValidEnrollments(StudentEnrollment enrollments)
         {
             if (String.IsNullOrWhiteSpace(enrollments.IndexNumber) ||
@@ -280,21 +346,24 @@ namespace api.DAL
                     student.IndexNumber = data["IndexNumber"].ToString();
                     student.Salt = data["Salt"].ToString();
                     student.Password = data["Password"].ToString();
-                } else
+                }
+                else
                 {
                     throw new AuthenticationException("Nie można zalogowac użytkownika");
                 }
             }
 
-            if (PasswordService.Validate(password,student.Salt, student.Password))
+            if (PasswordService.Validate(password, student.Salt, student.Password))
             {
                 return student;
-            } else
+            }
+            else
             {
                 throw new AuthenticationException("Nie można zalogowac użytkownika");
             }
-            
+
         }
+
 
     }
 }

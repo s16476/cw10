@@ -1,0 +1,6 @@
+TIME: 02.06.2020 16:01:27
+PATH: /weatherforecast
+METHOD: GET
+QUERY: 
+BODY: 
+==================================

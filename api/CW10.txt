@@ -1,0 +1,5 @@
+﻿Komenda do generowania:
+Scaffold-DbContext 'Data Source=localhost,1433;Initial Catalog=apbd;Integrated Security=True' Microsoft.EntityFrameworkCore.SqlServer -OutputDir models
+
+dodanie pola Salt na student:
+alter table Student add Salt varchar(32) 
