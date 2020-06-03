@@ -13,20 +13,13 @@ namespace api.DAL
 
         public Student GetStudent(string index);
 
-        public Student CreateStudent(Student student);
-
         public Student UpdateStudent(Student student);
 
         public void DeleteStudent(string index);
-
-        //======================================== Stare
-
-        public IEnumerable<Enrollment> GetEnrollmentsByStudentId(string id);
 
         public Enrollment EnrollStudentToStudies(StudentEnrollment enrollments);
 
         public Enrollment PromoteStudents(StudentsPromotion promotion);
 
-        public Student FindStudentToLogin(string login, string password);
     }
 }

@@ -1,4 +1,4 @@
-﻿/*using System;
+﻿using System;
 using api.DAL;
 using api.DTOs;
 using api.models;
@@ -21,37 +21,18 @@ namespace api.Controllers
         }
 
         [HttpPost()]
-        [Authorize(Roles = "employee")]
         public IActionResult EnrollStudentToStudies(StudentEnrollment enrollment)
         {
-            try
-            {
-                return Ok(_dbService.EnrollStudentToStudies(enrollment));
-            } catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-
+            var res = _dbService.EnrollStudentToStudies(enrollment);
+            return Ok(new EnrollmentDTO(res));
         }
 
         [Route("promotions")]
         [HttpPost]
         public IActionResult PromoteStudents(StudentsPromotion promotion)
         {
-            try
-            {
-                return Created("enrollments/promotions", _dbService.PromoteStudents(promotion));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-
+            var res = _dbService.PromoteStudents(promotion);
+            return Created("enrollments/promotions", new EnrollmentDTO(res));
         }
-
-
-
-
-
     }
-}*/
+}

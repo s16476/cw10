@@ -29,12 +29,6 @@ namespace api.Controllers
             return Ok(_dbService.GetStudent(index));
         }
 
-        [HttpPost]
-        public IActionResult CreateStudent(Student student)
-        {
-            return Ok(_dbService.CreateStudent(student));
-        }
-
         [HttpPut]
         public IActionResult UpdateStudent(Student student)
         {
@@ -48,8 +42,6 @@ namespace api.Controllers
             _dbService.DeleteStudent(index);
             return Ok("Usuwanie studenta o id " + index + " zakończone");
         }
-
-
 
     }
 }
